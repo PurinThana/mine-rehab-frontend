@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-sand-50 text-soil-700 font-body antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-forest-800;
+  }
+  ::selection {
+    @apply bg-clay-400/30 text-forest-900;
+  }
+}
+
+@layer utilities {
+  .tick-num {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
