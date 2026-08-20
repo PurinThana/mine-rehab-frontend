@@ -14,9 +14,10 @@ import {
   Td,
   Th,
 } from "../ui/Section.jsx";
-import { todayISO, formatThaiDate } from "../utils/date.js";
+import { todayISO, formatThaiDate } from "../../utils/date.js";
+import FileUploadField from "../ui/FileUploadField.jsx";
 
-const EMPTY = { title: "", body: "", publishedDate: todayISO() };
+const EMPTY = { title: "", body: "", imageUrl: "", publishedDate: todayISO() };
 
 export default function NewsSection({ siteId }) {
   const fetcher = useCallback(() => newsApi.getBySiteId(siteId, 100), [siteId]);
@@ -28,12 +29,14 @@ export default function NewsSection({ siteId }) {
     toForm: (row) => ({
       title: row.title,
       body: row.body || "",
+      imageUrl: row.image_url || "",
       publishedDate: row.published_date,
     }),
     toPayload: (form) => ({
       siteId,
       title: form.title.trim(),
       body: form.body.trim() || null,
+      imageUrl: form.imageUrl.trim() || null,
       publishedDate: form.publishedDate,
     }),
     validate: (form) => {
@@ -132,6 +135,13 @@ export default function NewsSection({ siteId }) {
           value={crud.form.body}
           onChange={(e) => crud.setField("body", e.target.value)}
           hint="เว้นว่างไว้ได้ถ้าต้องการแสดงแค่หัวข้อ"
+        />
+        <FileUploadField
+          label="รูปประกอบข่าว"
+          accept="image/*"
+          value={crud.form.imageUrl}
+          onChange={(url) => crud.setField("imageUrl", url)}
+          hint="ไม่ใส่ก็ได้ — หน้าเว็บจะแสดงเฉพาะหัวข้อกับวันที่"
         />
       </FormModal>
 

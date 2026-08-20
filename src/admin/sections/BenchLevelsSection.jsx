@@ -16,7 +16,7 @@ import {
   Td,
   Th,
 } from "../ui/Section.jsx";
-import { formatNumber } from "../utils/date.js";
+import { formatNumber } from "../../utils/date.js";
 import PlantingsModal from "./PlantingsModal.jsx";
 
 const STATUS_OPTIONS = [

@@ -13,7 +13,7 @@ import {
   Td,
   Th,
 } from "../ui/Section.jsx";
-import { formatNumber, formatThaiDate, todayISO } from "../utils/date.js";
+import { formatNumber, formatThaiDate, todayISO } from "../../utils/date.js";
 
 /**
  * Snapshot คือตารางเดียวที่เก็บ "ประวัติ" — ตารางอื่นเก็บแค่สถานะปัจจุบัน

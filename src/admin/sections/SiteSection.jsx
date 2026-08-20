@@ -5,7 +5,7 @@ import { useToast } from "../ui/Toast.jsx";
 import { DateField, TextField } from "../ui/Field.jsx";
 import { Section, StateBlock } from "../ui/Section.jsx";
 import { IconAlert, IconSpinner } from "../../components/Icons.jsx";
-import { formatNumber } from "../utils/date.js";
+import { formatNumber } from "../../utils/date.js";
 
 // ตัวเลขภาพรวมคำนวณสดจาก view ไม่มีคอลัมน์ให้แก้ — แสดงอ่านอย่างเดียว
 // เพื่อให้เห็นผลของการแก้ระดับชั้น/การปลูกได้ทันทีในหน้าเดียว

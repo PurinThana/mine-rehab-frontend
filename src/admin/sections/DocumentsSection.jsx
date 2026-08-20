@@ -14,7 +14,8 @@ import {
   Td,
   Th,
 } from "../ui/Section.jsx";
-import { todayISO, formatThaiDate, formatNumber } from "../utils/date.js";
+import { todayISO, formatThaiDate, formatNumber } from "../../utils/date.js";
+import FileUploadField from "../ui/FileUploadField.jsx";
 
 const EMPTY = {
   title: "",
@@ -48,7 +49,7 @@ export default function DocumentsSection({ siteId }) {
     }),
     validate: (form) => {
       if (!form.title.trim()) return "กรุณากรอกชื่อเอกสาร";
-      if (!form.fileUrl.trim()) return "กรุณากรอกที่อยู่ไฟล์ (URL หรือ path)";
+      if (!form.fileUrl.trim()) return "กรุณาอัปโหลดไฟล์ หรือวาง URL ของไฟล์";
       if (!form.category.trim()) return "กรุณากรอกหมวดเอกสาร";
       if (form.fileSizeKb === "" || Number(form.fileSizeKb) < 0)
         return "ขนาดไฟล์ต้องเป็นตัวเลขไม่ติดลบ";
@@ -67,7 +68,7 @@ export default function DocumentsSection({ siteId }) {
     <>
       <Section
         title="เอกสารดาวน์โหลด"
-        description="ตารางนี้เก็บแค่ข้อมูลของไฟล์ ต้องอัปโหลดไฟล์จริงไปที่ storage เองก่อน แล้วนำที่อยู่ไฟล์มากรอก"
+        description="อัปโหลด PDF ได้จากในฟอร์มโดยตรง ไฟล์จะถูกเก็บไว้ที่ Cloudinary แล้วบันทึกลิงก์ลงฐานข้อมูล"
         action={
           <PrimaryButton onClick={crud.openCreate}>
             <IconPlus />
@@ -139,13 +140,16 @@ export default function DocumentsSection({ siteId }) {
           onChange={(e) => crud.setField("title", e.target.value)}
           placeholder="เช่น รายงานความก้าวหน้าไตรมาส 2"
         />
-        <TextField
-          label="ที่อยู่ไฟล์ (URL หรือ path)"
+        <FileUploadField
+          label="ไฟล์เอกสาร (PDF)"
+          accept="application/pdf"
+          previewKind="document"
           required
           value={crud.form.fileUrl}
-          onChange={(e) => crud.setField("fileUrl", e.target.value)}
-          placeholder="/uploads/report-q2.pdf"
-          hint="ระบบนี้ไม่ได้อัปโหลดไฟล์ให้ ต้องนำไฟล์ขึ้น storage แล้วนำที่อยู่มาใส่"
+          onChange={(url) => crud.setField("fileUrl", url)}
+          // อัปโหลดแล้วรู้ขนาดไฟล์จริง ไม่ต้องให้ผู้ใช้กรอกเองแล้วเสี่ยงพิมพ์ผิด
+          onUploaded={(result) => crud.setField("fileSizeKb", String(result.sizeKb))}
+          hint="อัปโหลดแล้วระบบจะเติมขนาดไฟล์ให้อัตโนมัติ"
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField
@@ -159,6 +163,7 @@ export default function DocumentsSection({ siteId }) {
             label="ขนาดไฟล์ (KB)"
             required
             min="0"
+            hint="เติมอัตโนมัติเมื่ออัปโหลด"
             value={crud.form.fileSizeKb}
             onChange={(e) => crud.setField("fileSizeKb", e.target.value)}
           />

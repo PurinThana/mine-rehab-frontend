@@ -83,6 +83,21 @@ export const authApi = {
   changePassword: (data) => apiClient.post("/auth/change-password", data),
 };
 
+export const uploadsApi = {
+  // multipart/form-data — ปล่อยให้ browser ตั้ง Content-Type + boundary เอง
+  // ถ้าตั้ง "application/json" ทับตาม default ของ client ฝั่ง server จะ parse ไม่ออก
+  upload: (file, onProgress) => {
+    const form = new FormData();
+    form.append("file", file);
+    return apiClient.post("/uploads", form, {
+      headers: { "Content-Type": undefined },
+      onUploadProgress: onProgress
+        ? (e) => onProgress(e.total ? Math.round((e.loaded / e.total) * 100) : 0)
+        : undefined,
+    });
+  },
+};
+
 export const sitesApi = {
   getAll: () => apiClient.get("/sites"),
   getById: (id) => apiClient.get(`/sites/${id}`),

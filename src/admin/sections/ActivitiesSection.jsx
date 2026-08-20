@@ -14,7 +14,8 @@ import {
   Td,
   Th,
 } from "../ui/Section.jsx";
-import { todayISO, formatThaiDate } from "../utils/date.js";
+import { todayISO, formatThaiDate } from "../../utils/date.js";
+import FileUploadField from "../ui/FileUploadField.jsx";
 
 // ตรงกับค่าที่ seed.sql ใช้ และกับไอคอนที่ RecentActivities.jsx จับคู่ไว้
 const ACTIVITY_TYPES = [
@@ -33,6 +34,7 @@ const EMPTY = {
   description: "",
   activityDate: todayISO(),
   benchLevelId: "",
+  imageUrl: "",
 };
 
 export default function ActivitiesSection({ siteId }) {
@@ -63,6 +65,7 @@ export default function ActivitiesSection({ siteId }) {
       activityType: row.activity_type,
       title: row.title,
       description: row.description || "",
+      imageUrl: row.image_url || "",
       activityDate: row.activity_date,
       benchLevelId: row.bench_level_id == null ? "" : String(row.bench_level_id),
     }),
@@ -71,6 +74,7 @@ export default function ActivitiesSection({ siteId }) {
       activityType: form.activityType,
       title: form.title.trim(),
       description: form.description.trim() || null,
+      imageUrl: form.imageUrl.trim() || null,
       activityDate: form.activityDate,
       // "" = ไม่ผูกระดับชั้น ต้องส่ง null ไม่ใช่ "" ไม่งั้น FK พัง
       benchLevelId: form.benchLevelId === "" ? null : Number(form.benchLevelId),
@@ -194,6 +198,13 @@ export default function ActivitiesSection({ siteId }) {
           value={crud.form.description}
           onChange={(e) => crud.setField("description", e.target.value)}
           hint="เว้นว่างไว้ได้"
+        />
+        <FileUploadField
+          label="รูปภาพกิจกรรม"
+          accept="image/*"
+          value={crud.form.imageUrl}
+          onChange={(url) => crud.setField("imageUrl", url)}
+          hint="ถ้าไม่ใส่ การ์ดบนหน้าเว็บจะใช้ไอคอนตามประเภทกิจกรรมแทน"
         />
       </FormModal>
 

@@ -6,7 +6,7 @@
 
 ```bash
 npm install
-cp .env.example .env   # ตั้ง VITE_API_URL ให้ตรงกับ backend (ค่าเริ่มต้น http://localhost:4000/api)
+cp .env.example .env   # ตั้ง VITE_API_URL ให้ตรงกับ backend และ VITE_SITE_ID (ค่าเริ่มต้น 1)
 npm run dev
 ```
 
@@ -82,8 +82,10 @@ src/
     useCrud.js           กลไก เพิ่ม/แก้ไข/ลบ ที่ทุกหมวดใช้ร่วมกัน
   admin/
     AdminApp.jsx         ด่านตรวจสิทธิ์ + เมนู + ตัวเลือกไซต์
-    ui/                  Field, Modal/FormModal/ConfirmDialog, Toast, Section/ตาราง
-    utils/date.js        วันที่ พ.ศ. และตัวเลขแบบไทย
+    ui/                  Field, Modal/FormModal/ConfirmDialog, Toast, Section/ตาราง,
+                         FileUploadField (อัปโหลดรูป/PDF)
+  utils/date.js          วันที่ พ.ศ. และตัวเลขแบบไทย (ใช้ทั้งหน้าแอดมินและหน้า landing)
+  config.js              SITE_ID ของไซต์ที่หน้า landing แสดง
     sections/
       SiteSection.jsx          แก้ข้อมูลโครงการ + ดูตัวเลขภาพรวม (อ่านอย่างเดียว)
       BenchLevelsSection.jsx   ระดับชั้น: เพิ่ม/แก้ไข/ลบ + เปิดจัดการการปลูก
@@ -101,13 +103,39 @@ src/
 - **ทุกหมวดยึด “ไซต์ที่กำลังจัดการ”** จากตัวเลือกด้านบน ค่าเริ่มต้นคือไซต์ที่ผู้ใช้สังกัด (`user.siteId`) ถ้าไม่ผูกไซต์จะใช้ไซต์แรก
 - **`#/` เท่านั้นที่เป็น route** — anchor เดิมของหน้า landing (`#home`, `#bench`) จึงยังเลื่อนหน้าได้ตามปกติ ไม่ชนกัน
 - **ตัวเลขภาพรวมแก้ตรงๆ ไม่ได้** เพราะคำนวณสดจาก view — แสดงไว้ในหมวด “ข้อมูลโครงการ” เพื่อให้เห็นผลของการแก้ระดับชั้น/การปลูกได้ทันที
-- **เอกสารเก็บแค่ metadata** ระบบนี้ไม่ได้อัปโหลดไฟล์ ต้องนำไฟล์ขึ้น storage เองแล้วกรอกที่อยู่ไฟล์ และการลบรายการไม่ได้ลบไฟล์จริง
+- **เอกสารเก็บแค่ลิงก์ไฟล์** ตัวไฟล์อยู่บน Cloudinary (อัปโหลดได้จากในฟอร์ม) — การลบรายการลบแค่ข้อมูลในฐานข้อมูล ไฟล์บน Cloudinary ยังอยู่
 
-## ปรับแต่งข้อมูล
+## ส่วนที่ดึงข้อมูลจริงจากฐานข้อมูลแล้ว
 
-ข้อมูลตัวอย่างทั้งหมด (จำนวนระดับชั้น พื้นที่ จำนวนต้นไม้ ชนิดพืช ฯลฯ) อยู่เป็นค่าคงที่ที่ต้นไฟล์ของแต่ละ
-component (เช่น `LEVELS` ใน `BenchSummary.jsx`, `SPECIES` ใน `FlowerTypes.jsx`) แก้ไขตรงนั้นแล้วเชื่อมกับ
-API จริงได้ทันทีโดยแทนที่ค่าคงที่ด้วยข้อมูลจาก fetch/useEffect
+| Section | Component | มาจาก |
+|---|---|---|
+| กิจกรรมล่าสุด | `RecentActivities.jsx` | `GET /sites/:id/activities?limit=5` |
+| ข่าวสารและประกาศ | `NewsDownloads.jsx` | `GET /sites/:id/news?limit=3` |
+| ดาวน์โหลดเอกสาร | `NewsDownloads.jsx` | `GET /sites/:id/documents` |
+
+ไซต์ที่แสดงกำหนดด้วย `VITE_SITE_ID` (ดู `src/config.js`) — หน้าสาธารณะโชว์ทีละไซต์
+
+ทั้งสามส่วนมีสถานะ loading (โครงเปล่าขนาดเท่าของจริง กัน layout กระโดด), error และ
+"ยังไม่มีข้อมูล" ครบ จึงไม่พังถ้าฐานข้อมูลว่างหรือ backend ยังไม่ตื่นจาก cold start
+
+**รูปภาพ:** การ์ดกิจกรรมใช้ `image_url` ถ้ามี ถ้าไม่มีจะถอยไปใช้ไอคอนตาม `activity_type`
+(sow / prepare / plant / water / survey) เหมือนดีไซน์เดิม ข่าวที่มีรูปจะโชว์รูปย่อแทนจุดนำ
+
+**ยังเป็นข้อมูลตัวอย่างคงที่อยู่:** `Hero`, `StatsOverview`, `InfoStrip`, `BenchSummary`,
+`FlowerTypes` และการ์ด "ติดต่อเรา" — ต่อ API ได้ด้วยรูปแบบเดียวกัน (`useCollection` +
+`sitesApi.getOverview` / `benchLevelsApi.getBySiteId` / `speciesApi.getTotalsBySite`)
+
+## อัปโหลดรูปและ PDF
+
+หน้าแอดมินอัปโหลดไฟล์ได้จากในฟอร์มเลย (`admin/ui/FileUploadField.jsx`) — เลือกไฟล์
+จากเครื่อง ระบบส่งขึ้น `POST /uploads` ฝั่ง backend แล้วเก็บ URL ที่ได้ลงฐานข้อมูล
+
+- **กิจกรรม / ข่าวสาร** — อัปโหลดรูป (ไม่ใส่ก็ได้)
+- **เอกสาร** — อัปโหลด PDF และระบบจะเติมช่อง "ขนาดไฟล์" ให้เองจากไฟล์จริง
+- ทุกช่องยังวาง URL เองได้ ถ้าไฟล์อยู่ที่อื่นแล้ว
+
+ต้องตั้งค่า Cloudinary ฝั่ง backend ก่อน — ดูขั้นตอนใน README ของ backend
+(มีข้อที่มักพลาด: บัญชีฟรีบล็อกการส่ง PDF ไว้ ต้องไปติ๊กเปิดใน Settings → Security)
 
 ## โทนสีและตัวอักษร (ปรับได้ใน `tailwind.config.js`)
 

@@ -14,7 +14,7 @@ import {
   Th,
 } from "../ui/Section.jsx";
 import { IconAlert, IconSpinner } from "../../components/Icons.jsx";
-import { formatNumber, formatThaiDate, todayISO } from "../utils/date.js";
+import { formatNumber, formatThaiDate, todayISO } from "../../utils/date.js";
 
 /**
  * จัดการข้อมูลการปลูกของ "หนึ่งระดับชั้น"
