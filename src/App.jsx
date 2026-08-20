@@ -12,6 +12,7 @@ import LoginModal from './components/LoginModal.jsx'
 import SessionExpiredNotice from './components/SessionExpiredNotice.jsx'
 import AdminApp from './admin/AdminApp.jsx'
 import { useHashRoute } from './hooks/useHashRoute.js'
+import { SiteDataProvider } from './context/SiteDataContext.jsx'
 
 export default function App() {
   // กล่อง login อยู่ระดับนี้เพราะทั้ง Navbar, แจ้งเตือน session หมดอายุ และ
@@ -38,21 +39,25 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-sand-50">
-      <Navbar onLoginClick={openLogin} onAdminClick={() => navigate('/admin')} />
-      <main>
-        <Hero />
-        <StatsOverview />
-        <InfoStrip />
-        <BenchSummary />
-        <FlowerTypes />
-        <RecentActivities />
-        <NewsDownloads />
-      </main>
-      <Footer />
+    // SiteDataProvider โหลดข้อมูลไซต์ชุดเดียวให้ทุก section ใช้ร่วมกัน
+    // (Hero, StatsOverview, InfoStrip, BenchSummary, FlowerTypes)
+    <SiteDataProvider>
+      <div className="min-h-screen bg-sand-50">
+        <Navbar onLoginClick={openLogin} onAdminClick={() => navigate('/admin')} />
+        <main>
+          <Hero />
+          <StatsOverview />
+          <InfoStrip />
+          <BenchSummary />
+          <FlowerTypes />
+          <RecentActivities />
+          <NewsDownloads />
+        </main>
+        <Footer />
 
-      <LoginModal open={loginOpen} onClose={closeLogin} />
-      <SessionExpiredNotice onLoginClick={openLogin} />
-    </div>
+        <LoginModal open={loginOpen} onClose={closeLogin} />
+        <SessionExpiredNotice onLoginClick={openLogin} />
+      </div>
+    </SiteDataProvider>
   )
 }

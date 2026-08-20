@@ -43,6 +43,11 @@ src/
     SessionExpiredNotice.jsx แจ้งเตือนเมื่อ token หมดอายุ
   context/
     AuthContext.jsx         สถานะการล็อกอินของทั้งแอป (useAuth)
+    SiteDataContext.jsx     ข้อมูลไซต์ชุดเดียวที่ทุก section ใช้ร่วมกัน (useSiteData)
+  hooks/
+    useCollection.js        โหลดข้อมูลหนึ่งชุด + สถานะ loading/error
+  utils/date.js             วันที่ พ.ศ., ตัวเลขแบบไทย, ระยะเวลาโครงการ
+  config.js                 SITE_ID ของไซต์ที่หน้า landing แสดง
   api/
     index.js                axios client + endpoint ทั้งหมด
 ```
@@ -84,8 +89,6 @@ src/
     AdminApp.jsx         ด่านตรวจสิทธิ์ + เมนู + ตัวเลือกไซต์
     ui/                  Field, Modal/FormModal/ConfirmDialog, Toast, Section/ตาราง,
                          FileUploadField (อัปโหลดรูป/PDF)
-  utils/date.js          วันที่ พ.ศ. และตัวเลขแบบไทย (ใช้ทั้งหน้าแอดมินและหน้า landing)
-  config.js              SITE_ID ของไซต์ที่หน้า landing แสดง
     sections/
       SiteSection.jsx          แก้ข้อมูลโครงการ + ดูตัวเลขภาพรวม (อ่านอย่างเดียว)
       BenchLevelsSection.jsx   ระดับชั้น: เพิ่ม/แก้ไข/ลบ + เปิดจัดการการปลูก
@@ -107,23 +110,47 @@ src/
 
 ## ส่วนที่ดึงข้อมูลจริงจากฐานข้อมูลแล้ว
 
+ทุก section บนหน้า landing ดึงจากฐานข้อมูลแล้ว ไม่มีตัวเลข mock เหลืออยู่
+
 | Section | Component | มาจาก |
 |---|---|---|
+| Hero (ช่วงระดับชั้น, % ความคืบหน้า) | `Hero.jsx` | `sites/:id` + `overview` + `bench-levels` + `species-totals` |
+| ภาพรวมความก้าวหน้า | `StatsOverview.jsx` | `GET /sites/:id/overview` |
+| ระยะเวลาดำเนินงาน | `InfoStrip.jsx` | `GET /sites/:id` (คำนวณ % จาก start/end date) |
+| สรุปตามระดับชั้น | `BenchSummary.jsx` | `GET /sites/:id/bench-levels` |
+| ชนิดพืชคลุมดิน | `FlowerTypes.jsx` | `GET /sites/:id/species-totals` |
 | กิจกรรมล่าสุด | `RecentActivities.jsx` | `GET /sites/:id/activities?limit=5` |
 | ข่าวสารและประกาศ | `NewsDownloads.jsx` | `GET /sites/:id/news?limit=3` |
 | ดาวน์โหลดเอกสาร | `NewsDownloads.jsx` | `GET /sites/:id/documents` |
 
-ไซต์ที่แสดงกำหนดด้วย `VITE_SITE_ID` (ดู `src/config.js`) — หน้าสาธารณะโชว์ทีละไซต์
+### SiteDataContext
 
-ทั้งสามส่วนมีสถานะ loading (โครงเปล่าขนาดเท่าของจริง กัน layout กระโดด), error และ
-"ยังไม่มีข้อมูล" ครบ จึงไม่พังถ้าฐานข้อมูลว่างหรือ backend ยังไม่ตื่นจาก cold start
+ห้า section แรกใช้ข้อมูลชุดเดียวกันซ้ำๆ (overview ใช้ 2 ที่, bench-levels 2 ที่,
+species-totals 3 ที่) ถ้าปล่อยให้แต่ละ component ยิงเองจะกลายเป็น ~13 คำขอต่อการเปิด
+หน้าเดียว — `context/SiteDataContext.jsx` จึงโหลดทีเดียว 4 คำขอแบบขนานแล้วแชร์ผลให้ทุกตัว
 
-**รูปภาพ:** การ์ดกิจกรรมใช้ `image_url` ถ้ามี ถ้าไม่มีจะถอยไปใช้ไอคอนตาม `activity_type`
-(sow / prepare / plant / water / survey) เหมือนดีไซน์เดิม ข่าวที่มีรูปจะโชว์รูปย่อแทนจุดนำ
+```jsx
+const { site, overview, benchLevels, speciesTotals, loading, error, reload } = useSiteData()
+```
 
-**ยังเป็นข้อมูลตัวอย่างคงที่อยู่:** `Hero`, `StatsOverview`, `InfoStrip`, `BenchSummary`,
-`FlowerTypes` และการ์ด "ติดต่อเรา" — ต่อ API ได้ด้วยรูปแบบเดียวกัน (`useCollection` +
-`sitesApi.getOverview` / `benchLevelsApi.getBySiteId` / `speciesApi.getTotalsBySite`)
+### สิ่งที่คำนวณสดจากข้อมูล ไม่ฝังเป็นค่าคงที่
+
+- **วันที่ "ข้อมูล ณ วันที่ ..."** = วันนี้ เพราะตัวเลขภาพรวมคำนวณสดจาก view ทุกครั้งที่เรียก
+- **ช่วงระดับชั้น** (`+210 ถึง +270`) หาจาก min/max ของ `elevation_m`
+- **คำอธิบายใต้หัวข้อระดับชั้น** ตรวจว่าระยะห่างระหว่างชั้นเท่ากันไหม และพื้นที่เท่ากันไหม
+  แล้วเลือกข้อความให้ตรงกับข้อมูลจริง (เดิม hardcode ว่า "เท่ากันที่ 489 ตร.ม." ซึ่งไม่จริงแล้ว)
+- **ระยะเวลาโครงการ** `projectDuration()` ใน `utils/date.js` คำนวณ "รวมกี่ปี / ผ่านไปแล้วเท่าไร"
+  และ % ของแถบ progress จาก `start_date`/`end_date` (รองรับกรณียังไม่เริ่มและจบแล้ว)
+
+### สถานะไม่พร้อม
+
+ทุก section มี loading skeleton (ขนาดเท่าของจริง กัน layout กระโดด), error พร้อมปุ่ม
+"ลองอีกครั้ง" และ "ยังไม่มีข้อมูล" — ทดสอบด้วยการ build ชี้ API ไปพอร์ตที่ไม่มีอะไรฟัง
+แล้วหน้าเว็บยังแสดงโครงและข้อความบอกสาเหตุ ไม่ขาว ไม่ crash
+
+**ยังเป็นข้อความคงที่:** แผนช่วงหน้าร้อน/หน้าฝนใน `InfoStrip` และการ์ด "ติดต่อเรา"
+ใน `NewsDownloads` — เป็นเนื้อหาเชิงบรรยายที่ไม่มีตารางรองรับ ถ้าต้องการให้แก้จาก
+หน้าแอดมินต้องเพิ่มตารางใหม่ก่อน
 
 ## อัปโหลดรูปและ PDF
 
