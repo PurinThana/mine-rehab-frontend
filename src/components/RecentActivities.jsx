@@ -6,12 +6,16 @@ import { formatThaiDate } from '../utils/date.js'
 import { iconForActivityType } from '../utils/activityType.js'
 import { SITE_ID } from '../config.js'
 
-function ActivityCard({ activity }) {
+function ActivityCard({ activity, onOpen }) {
   // activity_type เป็นข้อความอิสระ จับคู่ไอคอนด้วยคำสำคัญ (ดู utils/activityType.js)
   const Icon = iconForActivityType(activity.activity_type)
 
   return (
-    <div className="group overflow-hidden rounded-xl2 border border-forest-700/8 bg-white shadow-card transition-transform hover:-translate-y-0.5">
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group overflow-hidden rounded-xl2 border border-forest-700/8 bg-white text-left shadow-card transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500/40"
+    >
       {activity.image_url ? (
         <img
           src={activity.image_url}
@@ -28,11 +32,11 @@ function ActivityCard({ activity }) {
         <p className="text-sm font-semibold leading-snug text-forest-800">{activity.title}</p>
         <p className="mt-1 text-xs text-soil-500">{formatThaiDate(activity.activity_date)}</p>
       </div>
-    </div>
+    </button>
   )
 }
 
-export default function RecentActivities({ onViewAll }) {
+export default function RecentActivities({ onViewAll, onOpenActivity }) {
   const fetcher = useCallback(() => activitiesApi.getBySiteId(SITE_ID, 5), [])
   const { data, loading, error } = useCollection(fetcher)
 
@@ -82,7 +86,11 @@ export default function RecentActivities({ onViewAll }) {
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {activities.map((activity) => (
-            <ActivityCard key={activity.id} activity={activity} />
+            <ActivityCard
+              key={activity.id}
+              activity={activity}
+              onOpen={() => onOpenActivity(activity.id)}
+            />
           ))}
         </div>
       )}

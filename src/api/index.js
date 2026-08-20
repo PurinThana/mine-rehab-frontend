@@ -130,6 +130,7 @@ export const plantingsApi = {
 export const activitiesApi = {
   getBySiteId: (siteId, limit = 5) =>
     apiClient.get(`/sites/${siteId}/activities`, { params: { limit } }),
+  getById: (id) => apiClient.get(`/activities/${id}`),
   create: (data) => apiClient.post("/activities", data),
   update: (id, data) => apiClient.put(`/activities/${id}`, data),
   delete: (id) => apiClient.delete(`/activities/${id}`),

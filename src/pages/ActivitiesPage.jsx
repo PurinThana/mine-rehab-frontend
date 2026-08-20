@@ -6,11 +6,15 @@ import { formatThaiDate } from '../utils/date.js'
 import { activityTypesFrom, iconForActivityType } from '../utils/activityType.js'
 import { SITE_ID } from '../config.js'
 
-function ActivityCard({ activity, benchLabel }) {
+function ActivityCard({ activity, benchLabel, onOpen }) {
   const Icon = iconForActivityType(activity.activity_type)
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl2 border border-forest-700/8 bg-white shadow-card transition-transform hover:-translate-y-0.5">
+    <button
+      type="button"
+      onClick={onOpen}
+      className="flex flex-col overflow-hidden rounded-xl2 border border-forest-700/8 bg-white text-left shadow-card transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500/40"
+    >
       {activity.image_url ? (
         <img
           src={activity.image_url}
@@ -44,10 +48,14 @@ function ActivityCard({ activity, benchLabel }) {
         <p className="tick-num mt-1 text-xs text-soil-500">{formatThaiDate(activity.activity_date)}</p>
 
         {activity.description && (
-          <p className="mt-3 text-sm leading-relaxed text-soil-600">{activity.description}</p>
+          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-soil-600">{activity.description}</p>
         )}
+
+        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700">
+          ดูรายละเอียด <IconArrow className="h-3.5 w-3.5" />
+        </span>
       </div>
-    </article>
+    </button>
   )
 }
 
@@ -64,7 +72,7 @@ function SkeletonCard() {
   )
 }
 
-export default function ActivitiesPage({ onExit }) {
+export default function ActivitiesPage({ onExit, onOpenActivity }) {
   const fetcher = useCallback(() => activitiesApi.getBySiteId(SITE_ID, 100), [])
   const { data, loading, error, reload } = useCollection(fetcher)
 
@@ -175,6 +183,7 @@ export default function ActivitiesPage({ onExit }) {
                 key={activity.id}
                 activity={activity}
                 benchLabel={benchLabelById.get(activity.bench_level_id)}
+                onOpen={() => onOpenActivity(activity.id)}
               />
             ))}
           </div>

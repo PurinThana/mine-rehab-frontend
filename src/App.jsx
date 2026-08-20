@@ -12,6 +12,7 @@ import LoginModal from './components/LoginModal.jsx'
 import SessionExpiredNotice from './components/SessionExpiredNotice.jsx'
 import AdminApp from './admin/AdminApp.jsx'
 import ActivitiesPage from './pages/ActivitiesPage.jsx'
+import ActivityDetailPage from './pages/ActivityDetailPage.jsx'
 import { useHashRoute } from './hooks/useHashRoute.js'
 import { SiteDataProvider } from './context/SiteDataContext.jsx'
 
@@ -41,11 +42,25 @@ export default function App() {
 
   // หน้าย่อยใช้ Navbar/Footer ร่วมกับหน้าหลัก แต่ไม่ต้องใช้ SiteDataProvider
   // เพราะดึงข้อมูลของตัวเองอยู่แล้ว
+  //
+  // "#/activities"    -> รายการกิจกรรมทั้งหมด
+  // "#/activities/7"  -> รายละเอียดกิจกรรม id 7 (เปิดลิงก์ตรง/refresh ได้)
   if (segments[0] === 'activities') {
+    const activityId = segments[1]
     return (
       <div className="min-h-screen bg-sand-50">
         <Navbar onLoginClick={openLogin} onAdminClick={() => navigate('/admin')} />
-        <ActivitiesPage onExit={() => navigate('/')} />
+        {activityId ? (
+          <ActivityDetailPage
+            activityId={activityId}
+            onBack={() => navigate('/activities')}
+          />
+        ) : (
+          <ActivitiesPage
+            onExit={() => navigate('/')}
+            onOpenActivity={(id) => navigate(`/activities/${id}`)}
+          />
+        )}
         <Footer />
 
         <LoginModal open={loginOpen} onClose={closeLogin} />
@@ -66,7 +81,10 @@ export default function App() {
           <InfoStrip />
           <BenchSummary />
           <FlowerTypes />
-          <RecentActivities onViewAll={() => navigate('/activities')} />
+          <RecentActivities
+            onViewAll={() => navigate('/activities')}
+            onOpenActivity={(id) => navigate(`/activities/${id}`)}
+          />
           <NewsDownloads />
         </main>
         <Footer />
