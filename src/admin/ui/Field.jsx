@@ -94,3 +94,26 @@ export function ColorField({ label, hint, required, error, className, value, onC
     </Wrapper>
   );
 }
+
+/**
+ * ช่องพิมพ์อิสระ + รายการแนะนำ (datalist)
+ *
+ * ใช้กับคอลัมน์ที่เป็นข้อความอิสระในฐานข้อมูล (เช่น activities.activity_type,
+ * documents.category ที่เป็น VARCHAR ไม่ใช่ ENUM) — ถ้าใช้ <select> ที่มี
+ * ตัวเลือกตายตัว ค่าที่ผู้ใช้ตั้งเองไว้แล้วจะแสดงไม่ได้ และเสี่ยงถูกเขียนทับ
+ * ตอนกดบันทึก ส่วน datalist ให้เลือกจากค่าที่เคยใช้ได้ และพิมพ์ค่าใหม่ก็ได้
+ */
+export function ComboField({ label, hint, required, error, className, options = [], ...props }) {
+  const id = useId();
+  const listId = `${id}-options`;
+  return (
+    <Wrapper {...{ label, hint, required, error, className }} htmlFor={id}>
+      <input id={id} list={listId} className={inputClass} {...props} />
+      <datalist id={listId}>
+        {options.map((opt) => (
+          <option key={opt} value={opt} />
+        ))}
+      </datalist>
+    </Wrapper>
+  );
+}

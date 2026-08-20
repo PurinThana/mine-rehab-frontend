@@ -11,6 +11,7 @@ import Footer from './components/Footer.jsx'
 import LoginModal from './components/LoginModal.jsx'
 import SessionExpiredNotice from './components/SessionExpiredNotice.jsx'
 import AdminApp from './admin/AdminApp.jsx'
+import ActivitiesPage from './pages/ActivitiesPage.jsx'
 import { useHashRoute } from './hooks/useHashRoute.js'
 import { SiteDataProvider } from './context/SiteDataContext.jsx'
 
@@ -38,6 +39,21 @@ export default function App() {
     )
   }
 
+  // หน้าย่อยใช้ Navbar/Footer ร่วมกับหน้าหลัก แต่ไม่ต้องใช้ SiteDataProvider
+  // เพราะดึงข้อมูลของตัวเองอยู่แล้ว
+  if (segments[0] === 'activities') {
+    return (
+      <div className="min-h-screen bg-sand-50">
+        <Navbar onLoginClick={openLogin} onAdminClick={() => navigate('/admin')} />
+        <ActivitiesPage onExit={() => navigate('/')} />
+        <Footer />
+
+        <LoginModal open={loginOpen} onClose={closeLogin} />
+        <SessionExpiredNotice onLoginClick={openLogin} />
+      </div>
+    )
+  }
+
   return (
     // SiteDataProvider โหลดข้อมูลไซต์ชุดเดียวให้ทุก section ใช้ร่วมกัน
     // (Hero, StatsOverview, InfoStrip, BenchSummary, FlowerTypes)
@@ -50,7 +66,7 @@ export default function App() {
           <InfoStrip />
           <BenchSummary />
           <FlowerTypes />
-          <RecentActivities />
+          <RecentActivities onViewAll={() => navigate('/activities')} />
           <NewsDownloads />
         </main>
         <Footer />

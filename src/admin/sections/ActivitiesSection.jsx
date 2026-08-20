@@ -3,7 +3,7 @@ import { activitiesApi, benchLevelsApi } from "../../api/index.js";
 import { useCollection } from "../../hooks/useCollection.js";
 import { useCrud } from "../../hooks/useCrud.js";
 import { FormModal, ConfirmDialog } from "../ui/Modal.jsx";
-import { DateField, SelectField, TextField, TextareaField } from "../ui/Field.jsx";
+import { ComboField, DateField, SelectField, TextField, TextareaField } from "../ui/Field.jsx";
 import {
   GhostButton,
   IconPlus,
@@ -17,19 +17,8 @@ import {
 import { todayISO, formatThaiDate } from "../../utils/date.js";
 import FileUploadField from "../ui/FileUploadField.jsx";
 
-// ตรงกับค่าที่ seed.sql ใช้ และกับไอคอนที่ RecentActivities.jsx จับคู่ไว้
-const ACTIVITY_TYPES = [
-  { value: "sow", label: "เพาะกล้า (sow)" },
-  { value: "prepare", label: "เตรียมดิน / ปรับพื้นที่ (prepare)" },
-  { value: "plant", label: "ปลูก (plant)" },
-  { value: "water", label: "ให้น้ำ / บำรุงรักษา (water)" },
-  { value: "survey", label: "สำรวจ (survey)" },
-];
-
-const TYPE_LABEL = Object.fromEntries(ACTIVITY_TYPES.map((t) => [t.value, t.label.split(" (")[0]]));
-
 const EMPTY = {
-  activityType: "plant",
+  activityType: "",
   title: "",
   description: "",
   activityDate: todayISO(),
@@ -71,7 +60,7 @@ export default function ActivitiesSection({ siteId }) {
     }),
     toPayload: (form) => ({
       siteId,
-      activityType: form.activityType,
+      activityType: form.activityType.trim(),
       title: form.title.trim(),
       description: form.description.trim() || null,
       imageUrl: form.imageUrl.trim() || null,
@@ -81,7 +70,7 @@ export default function ActivitiesSection({ siteId }) {
     }),
     validate: (form) => {
       if (!form.title.trim()) return "กรุณากรอกชื่อกิจกรรม";
-      if (!form.activityType) return "กรุณาเลือกประเภทกิจกรรม";
+      if (!form.activityType.trim()) return "กรุณาระบุประเภทกิจกรรม";
       if (!form.activityDate) return "กรุณาเลือกวันที่ทำกิจกรรม";
       return "";
     },
@@ -92,6 +81,12 @@ export default function ActivitiesSection({ siteId }) {
   });
 
   const rows = data || [];
+
+  // ประเภทที่เคยใช้จริง เอาไปเป็นรายการแนะนำในฟอร์ม — activity_type เป็นข้อความ
+  // อิสระ (VARCHAR) จึงไม่มีรายการค่าที่กำหนดไว้ล่วงหน้าให้ยึด
+  const existingTypes = [...new Set(rows.map((r) => r.activity_type).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, "th"),
+  );
 
   return (
     <>
@@ -137,7 +132,7 @@ export default function ActivitiesSection({ siteId }) {
                     )}
                   </Td>
                   <Td className="text-xs text-soil-600">
-                    {TYPE_LABEL[row.activity_type] || row.activity_type}
+                    {row.activity_type}
                   </Td>
                   <Td className="tick-num text-xs text-soil-600">{benchLabel(row.bench_level_id)}</Td>
                   <Td className="whitespace-nowrap text-right">
@@ -172,12 +167,14 @@ export default function ActivitiesSection({ siteId }) {
           placeholder="เช่น ปลูกเฟื่องฟ้าระดับชั้น +246"
         />
         <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField
+          <ComboField
             label="ประเภทกิจกรรม"
             required
-            options={ACTIVITY_TYPES}
+            options={existingTypes}
             value={crud.form.activityType}
             onChange={(e) => crud.setField("activityType", e.target.value)}
+            placeholder="เช่น ปลูกต้นไม้"
+            hint="พิมพ์ใหม่ได้ หรือเลือกจากประเภทที่เคยใช้"
           />
           <DateField
             label="วันที่ทำกิจกรรม"

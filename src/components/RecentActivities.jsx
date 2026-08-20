@@ -1,30 +1,14 @@
 import { useCallback } from 'react'
-import {
-  IconSprout,
-  IconArea,
-  IconBench,
-  IconRain,
-  IconGauge,
-  IconArrow,
-  IconAlert,
-} from './Icons.jsx'
+import { IconArrow, IconAlert } from './Icons.jsx'
 import { activitiesApi } from '../api/index.js'
 import { useCollection } from '../hooks/useCollection.js'
 import { formatThaiDate } from '../utils/date.js'
+import { iconForActivityType } from '../utils/activityType.js'
 import { SITE_ID } from '../config.js'
 
-// ไอคอนสำรองตาม activity_type — ใช้เมื่อกิจกรรมนั้นไม่ได้แนบรูปมา
-// ค่า key ตรงกับตัวเลือกในหน้าแอดมิน (sow / prepare / plant / water / survey)
-const TYPE_ICONS = {
-  sow: IconSprout,
-  prepare: IconArea,
-  plant: IconBench,
-  water: IconRain,
-  survey: IconGauge,
-}
-
 function ActivityCard({ activity }) {
-  const Icon = TYPE_ICONS[activity.activity_type] || IconSprout
+  // activity_type เป็นข้อความอิสระ จับคู่ไอคอนด้วยคำสำคัญ (ดู utils/activityType.js)
+  const Icon = iconForActivityType(activity.activity_type)
 
   return (
     <div className="group overflow-hidden rounded-xl2 border border-forest-700/8 bg-white shadow-card transition-transform hover:-translate-y-0.5">
@@ -48,7 +32,7 @@ function ActivityCard({ activity }) {
   )
 }
 
-export default function RecentActivities() {
+export default function RecentActivities({ onViewAll }) {
   const fetcher = useCallback(() => activitiesApi.getBySiteId(SITE_ID, 5), [])
   const { data, loading, error } = useCollection(fetcher)
 
@@ -61,9 +45,13 @@ export default function RecentActivities() {
           <p className="text-xs font-semibold uppercase tracking-wider text-clay-600">ภาคสนาม</p>
           <h2 className="mt-1 text-2xl font-semibold sm:text-3xl">กิจกรรมล่าสุด</h2>
         </div>
-        <a href="#activities-full" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:text-forest-600">
+        <button
+          type="button"
+          onClick={onViewAll}
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 transition-colors hover:text-forest-600"
+        >
           ดูกิจกรรมทั้งหมด <IconArrow className="h-3.5 w-3.5" />
-        </a>
+        </button>
       </div>
 
       {loading ? (
