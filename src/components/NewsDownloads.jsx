@@ -138,7 +138,7 @@ export default function NewsDownloads({ onViewAllNews, onOpenPost }) {
                 {docItems.map((f) => (
                   <li key={f.id}>
                     <a
-                      href={f.file_url}
+                      href={documentsApi.fileUrl(f.id)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 rounded-lg px-1.5 py-2.5 hover:bg-sand-50"

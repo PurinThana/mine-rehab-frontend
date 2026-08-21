@@ -3,6 +3,7 @@ import { sitesApi, getErrorMessage } from "../../api/index.js";
 import { useCollection } from "../../hooks/useCollection.js";
 import { useToast } from "../ui/Toast.jsx";
 import { DateField, TextField } from "../ui/Field.jsx";
+import FileUploadField from "../ui/FileUploadField.jsx";
 import { Section, StateBlock } from "../ui/Section.jsx";
 import { IconAlert, IconSpinner } from "../../components/Icons.jsx";
 import { formatNumber } from "../../utils/date.js";
@@ -46,6 +47,7 @@ export default function SiteSection({ siteId }) {
       companyName: site.company_name,
       startDate: site.start_date,
       endDate: site.end_date,
+      heroImageUrl: site.hero_image_url || "",
     });
     setFormError("");
   }, [site]);
@@ -69,6 +71,7 @@ export default function SiteSection({ siteId }) {
         companyName: form.companyName.trim(),
         startDate: form.startDate,
         endDate: form.endDate,
+        heroImageUrl: form.heroImageUrl.trim() || null,
       });
       toast.success("บันทึกข้อมูลโครงการแล้ว");
       await reload();
@@ -125,6 +128,13 @@ export default function SiteSection({ siteId }) {
                     onChange={(e) => setField("endDate", e.target.value)}
                   />
                 </div>
+                <FileUploadField
+                  label="รูปพื้นหลังส่วนหัวเว็บ (Hero)"
+                  accept="image/*"
+                  value={form.heroImageUrl}
+                  onChange={(url) => setField("heroImageUrl", url)}
+                  hint="แนะนำรูปแนวนอนกว้างอย่างน้อย 1600px · ระบบใส่ชั้นสีเข้มทับให้อยู่แล้ว ตัวหนังสือจึงอ่านออกทุกรูป · ไม่ใส่ก็ได้ จะเป็นพื้นสีเขียวเข้มเหมือนเดิม"
+                />
               </div>
 
               <div className="flex justify-end border-t border-forest-700/10 bg-sand-100/60 px-5 py-3.5">

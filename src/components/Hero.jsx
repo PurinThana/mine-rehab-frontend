@@ -5,7 +5,9 @@ import { useSiteData } from '../context/SiteDataContext.jsx'
 import { formatNumber, formatThaiDate, todayISO } from '../utils/date.js'
 
 export default function Hero() {
-  const { overview, benchLevels, speciesTotals, loading } = useSiteData()
+  const { site, overview, benchLevels, speciesTotals, loading } = useSiteData()
+
+  const heroImage = site?.hero_image_url || null
 
   const levels = benchLevels || []
   const elevations = levels.map((l) => Number(l.elevation_m))
@@ -23,6 +25,28 @@ export default function Hero() {
 
   return (
     <section id="home" className="relative overflow-hidden bg-forest-800">
+      {/*
+        รูปพื้นหลัง (ตั้งได้จากหน้าแอดมิน → ข้อมูลโครงการ)
+        ถ้าไม่ได้ตั้งไว้ จะเหลือพื้นสีเขียวเข้มเหมือนดีไซน์เดิม
+
+        ต้องมีชั้นทับสีเข้มคลุมไว้ ไม่ว่ารูปจะสว่างหรือมืด ตัวหนังสือสีครีม
+        จึงยังอ่านออก — ถ้าวางรูปเปล่าๆ ข้อความจะจมหายไปกับรูปที่สว่าง
+      */}
+      {heroImage && (
+        <>
+          <img
+            src={heroImage}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-forest-900/95 via-forest-900/80 to-forest-800/55"
+          />
+        </>
+      )}
+
       {/* faint oversized contour ring, purely atmospheric */}
       <div className="pointer-events-none absolute -left-40 -top-40 h-[560px] w-[560px] rounded-full border border-sand-50/5" />
       <div className="pointer-events-none absolute -left-20 -top-20 h-[420px] w-[420px] rounded-full border border-sand-50/5" />

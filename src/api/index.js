@@ -5,8 +5,10 @@ import axios from "axios";
 // ============================================================================
 const TOKEN_KEY = "token";
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -138,6 +140,9 @@ export const activitiesApi = {
 
 export const documentsApi = {
   getBySiteId: (siteId) => apiClient.get(`/sites/${siteId}/documents`),
+  // ลิงก์เปิด/ดาวน์โหลดไฟล์ — ต้องผ่าน API ไม่ใช่ URL ของ Cloudinary ตรงๆ
+  // เพราะบัญชีฟรีบล็อกการส่ง PDF ออก (ดู backend/src/controllers/documents.controller.js)
+  fileUrl: (id) => `${API_BASE_URL}/documents/${id}/file`,
   create: (data) => apiClient.post("/documents", data),
   update: (id, data) => apiClient.put(`/documents/${id}`, data),
   delete: (id) => apiClient.delete(`/documents/${id}`),
