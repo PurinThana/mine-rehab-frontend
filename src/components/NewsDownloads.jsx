@@ -58,7 +58,7 @@ function CardState({ loading, error, empty, emptyText, skeletonRows = 3, childre
   return children
 }
 
-export default function NewsDownloads() {
+export default function NewsDownloads({ onViewAllNews, onOpenPost }) {
   const newsFetcher = useCallback(() => newsApi.getBySiteId(SITE_ID, 3), [])
   const { data: news, loading: newsLoading, error: newsError } = useCollection(newsFetcher)
 
@@ -77,7 +77,7 @@ export default function NewsDownloads() {
           <div className="rounded-xl2 border border-forest-700/8 bg-white p-6 shadow-card">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-forest-800">ข่าวสารและประกาศ</h3>
-              <a href="#news-full" className="text-xs font-semibold text-forest-700 hover:text-forest-600">ดูทั้งหมด</a>
+              <button type="button" onClick={onViewAllNews} className="text-xs font-semibold text-forest-700 transition-colors hover:text-forest-600">ดูทั้งหมด</button>
             </div>
             <CardState
               loading={newsLoading}
@@ -87,21 +87,34 @@ export default function NewsDownloads() {
             >
               <ul className="space-y-4">
                 {newsItems.map((n) => (
-                  <li key={n.id} className="flex gap-3">
-                    {n.image_url ? (
-                      <img
-                        src={n.image_url}
-                        alt={n.title}
-                        loading="lazy"
-                        className="h-12 w-12 shrink-0 rounded-lg border border-forest-700/10 object-cover"
-                      />
-                    ) : (
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-clay-500" />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs text-soil-400">{formatThaiDate(n.published_date)}</p>
-                      <p className="text-sm leading-snug text-soil-700">{n.title}</p>
-                    </div>
+                  <li key={n.id}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenPost(n.id)}
+                      className="flex w-full gap-3 rounded-lg text-left transition-colors hover:bg-sand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500/40"
+                    >
+                      {n.image_url ? (
+                        <span className="relative shrink-0">
+                          <img
+                            src={n.image_url}
+                            alt={n.title}
+                            loading="lazy"
+                            className="h-12 w-12 rounded-lg border border-forest-700/10 object-cover"
+                          />
+                          {n.images?.length > 1 && (
+                            <span className="tick-num absolute -bottom-1 -right-1 rounded-full bg-soil-900/70 px-1.5 text-[10px] font-medium text-sand-50">
+                              {n.images.length}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-clay-500" />
+                      )}
+                      <span className="min-w-0">
+                        <span className="block text-xs text-soil-400">{formatThaiDate(n.published_date)}</span>
+                        <span className="block text-sm leading-snug text-soil-700">{n.title}</span>
+                      </span>
+                    </button>
                   </li>
                 ))}
               </ul>

@@ -146,6 +146,7 @@ export const documentsApi = {
 export const newsApi = {
   getBySiteId: (siteId, limit = 5) =>
     apiClient.get(`/sites/${siteId}/news`, { params: { limit } }),
+  getById: (id) => apiClient.get(`/news/${id}`),
   create: (data) => apiClient.post("/news", data),
   update: (id, data) => apiClient.put(`/news/${id}`, data),
   delete: (id) => apiClient.delete(`/news/${id}`),

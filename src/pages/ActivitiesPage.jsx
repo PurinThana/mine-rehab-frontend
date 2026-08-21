@@ -4,6 +4,7 @@ import { activitiesApi, benchLevelsApi } from '../api/index.js'
 import { useCollection } from '../hooks/useCollection.js'
 import { formatThaiDate } from '../utils/date.js'
 import { activityTypesFrom, iconForActivityType } from '../utils/activityType.js'
+import { stripHtml } from '../utils/richTextPreview.js'
 import { SITE_ID } from '../config.js'
 
 function ActivityCard({ activity, benchLabel, onOpen }) {
@@ -15,18 +16,25 @@ function ActivityCard({ activity, benchLabel, onOpen }) {
       onClick={onOpen}
       className="flex flex-col overflow-hidden rounded-xl2 border border-forest-700/8 bg-white text-left shadow-card transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500/40"
     >
-      {activity.image_url ? (
-        <img
-          src={activity.image_url}
-          alt={activity.title}
-          loading="lazy"
-          className="h-44 w-full object-cover"
-        />
-      ) : (
-        <div className="flex h-44 items-center justify-center bg-gradient-to-br from-forest-600 to-forest-800">
-          <Icon className="h-12 w-12 text-sand-50/90" />
-        </div>
-      )}
+      <span className="relative block">
+        {activity.image_url ? (
+          <img
+            src={activity.image_url}
+            alt={activity.title}
+            loading="lazy"
+            className="h-44 w-full object-cover"
+          />
+        ) : (
+          <span className="flex h-44 items-center justify-center bg-gradient-to-br from-forest-600 to-forest-800">
+            <Icon className="h-12 w-12 text-sand-50/90" />
+          </span>
+        )}
+        {activity.images?.length > 1 && (
+          <span className="tick-num absolute right-3 top-3 rounded-full bg-soil-900/55 px-2.5 py-0.5 text-xs font-medium text-sand-50">
+            {activity.images.length} รูป
+          </span>
+        )}
+      </span>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-wrap items-center gap-2">
@@ -48,7 +56,7 @@ function ActivityCard({ activity, benchLabel, onOpen }) {
         <p className="tick-num mt-1 text-xs text-soil-500">{formatThaiDate(activity.activity_date)}</p>
 
         {activity.description && (
-          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-soil-600">{activity.description}</p>
+          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-soil-600">{stripHtml(activity.description)}</p>
         )}
 
         <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700">

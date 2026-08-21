@@ -62,7 +62,7 @@ export default function Navbar({ onLoginClick, onAdminClick }) {
               className="hidden items-center gap-2 rounded-full bg-forest-700 px-4 py-2 text-sm font-medium text-sand-50 shadow-card transition-colors hover:bg-forest-600 sm:flex"
             >
               <IconLock className="h-4 w-4" />
-              สำหรับ กพร.
+              สำหรับผู้ดูแล
             </button>
           )}
 
@@ -81,7 +81,11 @@ export default function Navbar({ onLoginClick, onAdminClick }) {
               strokeWidth="2"
               strokeLinecap="round"
             >
-              {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+              {open ? (
+                <path d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
             </svg>
           </button>
         </div>

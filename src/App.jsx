@@ -13,6 +13,8 @@ import SessionExpiredNotice from './components/SessionExpiredNotice.jsx'
 import AdminApp from './admin/AdminApp.jsx'
 import ActivitiesPage from './pages/ActivitiesPage.jsx'
 import ActivityDetailPage from './pages/ActivityDetailPage.jsx'
+import NewsPage from './pages/NewsPage.jsx'
+import NewsDetailPage from './pages/NewsDetailPage.jsx'
 import { useHashRoute } from './hooks/useHashRoute.js'
 import { SiteDataProvider } from './context/SiteDataContext.jsx'
 
@@ -69,6 +71,25 @@ export default function App() {
     )
   }
 
+  // "#/news" -> รายการข่าวทั้งหมด, "#/news/3" -> รายละเอียดข่าว
+  if (segments[0] === 'news') {
+    const postId = segments[1]
+    return (
+      <div className="min-h-screen bg-sand-50">
+        <Navbar onLoginClick={openLogin} onAdminClick={() => navigate('/admin')} />
+        {postId ? (
+          <NewsDetailPage postId={postId} onBack={() => navigate('/news')} />
+        ) : (
+          <NewsPage onExit={() => navigate('/')} onOpenPost={(id) => navigate(`/news/${id}`)} />
+        )}
+        <Footer />
+
+        <LoginModal open={loginOpen} onClose={closeLogin} />
+        <SessionExpiredNotice onLoginClick={openLogin} />
+      </div>
+    )
+  }
+
   return (
     // SiteDataProvider โหลดข้อมูลไซต์ชุดเดียวให้ทุก section ใช้ร่วมกัน
     // (Hero, StatsOverview, InfoStrip, BenchSummary, FlowerTypes)
@@ -85,7 +106,10 @@ export default function App() {
             onViewAll={() => navigate('/activities')}
             onOpenActivity={(id) => navigate(`/activities/${id}`)}
           />
-          <NewsDownloads />
+          <NewsDownloads
+            onViewAllNews={() => navigate('/news')}
+            onOpenPost={(id) => navigate(`/news/${id}`)}
+          />
         </main>
         <Footer />
 

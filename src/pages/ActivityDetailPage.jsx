@@ -3,6 +3,8 @@ import { IconArrow, IconAlert, IconPin, IconClock, IconSpinner } from '../compon
 import { activitiesApi } from '../api/index.js'
 import { useCollection } from '../hooks/useCollection.js'
 import { formatThaiDate } from '../utils/date.js'
+import ImageCarousel from '../components/ImageCarousel.jsx'
+import RichText from '../components/RichText.jsx'
 import { iconForActivityType } from '../utils/activityType.js'
 
 function BackLink({ onBack, tone = 'dark' }) {
@@ -71,6 +73,11 @@ export default function ActivityDetailPage({ activityId, onBack }) {
   if (!activity) return null
 
   const Icon = iconForActivityType(activity.activity_type)
+  const gallery = activity.images?.length
+    ? activity.images
+    : activity.image_url
+      ? [activity.image_url]
+      : []
 
   return (
     <>
@@ -103,25 +110,21 @@ export default function ActivityDetailPage({ activityId, onBack }) {
       </section>
 
       <main className="mx-auto max-w-4xl px-5 py-10 lg:px-8">
-        {activity.image_url ? (
-          <img
-            src={activity.image_url}
-            alt={activity.title}
-            className="w-full rounded-xl2 border border-forest-700/8 bg-white object-cover shadow-card"
-          />
-        ) : (
-          <div className="flex h-52 items-center justify-center rounded-xl2 bg-gradient-to-br from-forest-600 to-forest-800 shadow-card sm:h-64">
-            <Icon className="h-16 w-16 text-sand-50/90" />
-          </div>
-        )}
+        <ImageCarousel
+          images={gallery}
+          alt={activity.title}
+          className="h-64 shadow-card sm:h-80 lg:h-96"
+          fallback={
+            <div className="flex h-52 items-center justify-center rounded-xl2 bg-gradient-to-br from-forest-600 to-forest-800 shadow-card sm:h-64">
+              <Icon className="h-16 w-16 text-sand-50/90" />
+            </div>
+          }
+        />
 
         <div className="mt-6 rounded-xl2 border border-forest-700/8 bg-white p-6 shadow-card">
           <h2 className="font-display text-base font-semibold text-forest-800">รายละเอียด</h2>
           {activity.description ? (
-            // whitespace-pre-line เพื่อให้การเว้นบรรทัดที่พิมพ์ในหน้าแอดมินยังอยู่
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-soil-600">
-              {activity.description}
-            </p>
+            <RichText html={activity.description} className="mt-2 text-sm" />
           ) : (
             <p className="mt-2 text-sm text-soil-400">ไม่ได้บันทึกรายละเอียดเพิ่มเติมไว้</p>
           )}

@@ -15,7 +15,9 @@ import {
   Th,
 } from "../ui/Section.jsx";
 import { todayISO, formatThaiDate } from "../../utils/date.js";
-import FileUploadField from "../ui/FileUploadField.jsx";
+import MultiImageField from "../ui/MultiImageField.jsx";
+import { stripHtml } from "../../utils/richTextPreview.js";
+import RichTextField from "../ui/RichTextField.jsx";
 
 const EMPTY = {
   activityType: "",
@@ -23,7 +25,7 @@ const EMPTY = {
   description: "",
   activityDate: todayISO(),
   benchLevelId: "",
-  imageUrl: "",
+  images: [],
 };
 
 export default function ActivitiesSection({ siteId }) {
@@ -54,7 +56,7 @@ export default function ActivitiesSection({ siteId }) {
       activityType: row.activity_type,
       title: row.title,
       description: row.description || "",
-      imageUrl: row.image_url || "",
+      images: row.images || [],
       activityDate: row.activity_date,
       benchLevelId: row.bench_level_id == null ? "" : String(row.bench_level_id),
     }),
@@ -63,7 +65,7 @@ export default function ActivitiesSection({ siteId }) {
       activityType: form.activityType.trim(),
       title: form.title.trim(),
       description: form.description.trim() || null,
-      imageUrl: form.imageUrl.trim() || null,
+      images: form.images,
       activityDate: form.activityDate,
       // "" = ไม่ผูกระดับชั้น ต้องส่ง null ไม่ใช่ "" ไม่งั้น FK พัง
       benchLevelId: form.benchLevelId === "" ? null : Number(form.benchLevelId),
@@ -127,8 +129,12 @@ export default function ActivitiesSection({ siteId }) {
                     <p className="font-medium text-forest-800">{row.title}</p>
                     {row.description && (
                       <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-soil-500">
-                        {row.description}
+                        {/* description เก็บเป็น HTML — ตัด tag ออกก่อนโชว์ในตาราง */}
+                        {stripHtml(row.description, 160)}
                       </p>
+                    )}
+                    {row.images?.length > 0 && (
+                      <p className="mt-1 text-[11px] text-soil-400">รูป {row.images.length} รูป</p>
                     )}
                   </Td>
                   <Td className="text-xs text-soil-600">
@@ -190,18 +196,17 @@ export default function ActivitiesSection({ siteId }) {
           onChange={(e) => crud.setField("benchLevelId", e.target.value)}
           hint="กิจกรรมภาพรวม เช่น การสำรวจ ไม่ต้องผูกกับระดับชั้นใด"
         />
-        <TextareaField
+        <RichTextField
           label="รายละเอียด"
           value={crud.form.description}
-          onChange={(e) => crud.setField("description", e.target.value)}
-          hint="เว้นว่างไว้ได้"
+          onChange={(html) => crud.setField("description", html)}
+          hint="จัดตัวหนา สี และตำแหน่งข้อความได้ · เว้นว่างไว้ได้"
         />
-        <FileUploadField
+        <MultiImageField
           label="รูปภาพกิจกรรม"
-          accept="image/*"
-          value={crud.form.imageUrl}
-          onChange={(url) => crud.setField("imageUrl", url)}
-          hint="ถ้าไม่ใส่ การ์ดบนหน้าเว็บจะใช้ไอคอนตามประเภทกิจกรรมแทน"
+          value={crud.form.images}
+          onChange={(images) => crud.setField("images", images)}
+          hint="ใส่ได้หลายรูป เลื่อนดูเป็น carousel บนหน้าเว็บ · รูปแรกใช้เป็นรูปปกบนการ์ด · ถ้าไม่ใส่จะใช้ไอคอนตามประเภทกิจกรรม"
         />
       </FormModal>
 

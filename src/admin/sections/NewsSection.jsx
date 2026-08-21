@@ -15,9 +15,11 @@ import {
   Th,
 } from "../ui/Section.jsx";
 import { todayISO, formatThaiDate } from "../../utils/date.js";
-import FileUploadField from "../ui/FileUploadField.jsx";
+import MultiImageField from "../ui/MultiImageField.jsx";
+import { stripHtml } from "../../utils/richTextPreview.js";
+import RichTextField from "../ui/RichTextField.jsx";
 
-const EMPTY = { title: "", body: "", imageUrl: "", publishedDate: todayISO() };
+const EMPTY = { title: "", body: "", images: [], publishedDate: todayISO() };
 
 export default function NewsSection({ siteId }) {
   const fetcher = useCallback(() => newsApi.getBySiteId(siteId, 100), [siteId]);
@@ -29,14 +31,14 @@ export default function NewsSection({ siteId }) {
     toForm: (row) => ({
       title: row.title,
       body: row.body || "",
-      imageUrl: row.image_url || "",
+      images: row.images || [],
       publishedDate: row.published_date,
     }),
     toPayload: (form) => ({
       siteId,
       title: form.title.trim(),
-      body: form.body.trim() || null,
-      imageUrl: form.imageUrl.trim() || null,
+      body: form.body || null,
+      images: form.images,
       publishedDate: form.publishedDate,
     }),
     validate: (form) => {
@@ -89,8 +91,12 @@ export default function NewsSection({ siteId }) {
                     <p className="font-medium text-forest-800">{row.title}</p>
                     {row.body && (
                       <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-soil-500">
-                        {row.body}
+                        {/* body เก็บเป็น HTML — ตัด tag ออกก่อนโชว์ในตาราง */}
+                        {stripHtml(row.body, 160)}
                       </p>
+                    )}
+                    {row.images?.length > 0 && (
+                      <p className="mt-1 text-[11px] text-soil-400">รูป {row.images.length} รูป</p>
                     )}
                   </Td>
                   <Td className="whitespace-nowrap text-right">
@@ -129,19 +135,18 @@ export default function NewsSection({ siteId }) {
           value={crud.form.publishedDate}
           onChange={(e) => crud.setField("publishedDate", e.target.value)}
         />
-        <TextareaField
+        <RichTextField
           label="เนื้อหา"
-          rows={6}
+          minHeight="14rem"
           value={crud.form.body}
-          onChange={(e) => crud.setField("body", e.target.value)}
-          hint="เว้นว่างไว้ได้ถ้าต้องการแสดงแค่หัวข้อ"
+          onChange={(html) => crud.setField("body", html)}
+          hint="จัดตัวหนา สี และตำแหน่งข้อความได้ · เว้นว่างไว้ได้ถ้าต้องการแสดงแค่หัวข้อ"
         />
-        <FileUploadField
+        <MultiImageField
           label="รูปประกอบข่าว"
-          accept="image/*"
-          value={crud.form.imageUrl}
-          onChange={(url) => crud.setField("imageUrl", url)}
-          hint="ไม่ใส่ก็ได้ — หน้าเว็บจะแสดงเฉพาะหัวข้อกับวันที่"
+          value={crud.form.images}
+          onChange={(images) => crud.setField("images", images)}
+          hint="ใส่ได้หลายรูป เลื่อนดูเป็น carousel ในหน้าข่าว · รูปแรกใช้เป็นรูปย่อในรายการ"
         />
       </FormModal>
 

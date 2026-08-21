@@ -19,9 +19,13 @@ export default function LoginModal({ open, onClose }) {
   const passwordId = useId();
   const emailRef = useRef(null);
 
-  const [email, setEmail] = useState(() => localStorage.getItem(LAST_EMAIL_KEY) || "");
+  const [email, setEmail] = useState(
+    () => localStorage.getItem(LAST_EMAIL_KEY) || "",
+  );
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(() => Boolean(localStorage.getItem(LAST_EMAIL_KEY)));
+  const [remember, setRemember] = useState(() =>
+    Boolean(localStorage.getItem(LAST_EMAIL_KEY)),
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -118,11 +122,14 @@ export default function LoginModal({ open, onClose }) {
               <ContourMark className="h-8 w-8" />
             </span>
             <span className="flex flex-col">
-              <h2 id="login-title" className="font-display text-lg font-semibold text-sand-50">
+              <h2
+                id="login-title"
+                className="font-display text-lg font-semibold text-sand-50"
+              >
                 เข้าสู่ระบบสำหรับเจ้าหน้าที่
               </h2>
               <span className="text-xs text-sand-200/80">
-                สำหรับ กพร. และผู้ดูแลข้อมูลโครงการเท่านั้น
+                สำหรับผู้ดูแลข้อมูลโครงการเท่านั้น
               </span>
             </span>
           </div>
@@ -140,7 +147,10 @@ export default function LoginModal({ open, onClose }) {
           )}
 
           {/* อีเมล */}
-          <label htmlFor={emailId} className="mb-1.5 block text-sm font-medium text-soil-700">
+          <label
+            htmlFor={emailId}
+            className="mb-1.5 block text-sm font-medium text-soil-700"
+          >
             อีเมล
           </label>
           <div className="relative mb-4">
@@ -162,7 +172,10 @@ export default function LoginModal({ open, onClose }) {
           </div>
 
           {/* รหัสผ่าน */}
-          <label htmlFor={passwordId} className="mb-1.5 block text-sm font-medium text-soil-700">
+          <label
+            htmlFor={passwordId}
+            className="mb-1.5 block text-sm font-medium text-soil-700"
+          >
             รหัสผ่าน
           </label>
           <div className="relative mb-4">

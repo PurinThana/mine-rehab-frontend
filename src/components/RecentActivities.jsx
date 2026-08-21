@@ -16,18 +16,25 @@ function ActivityCard({ activity, onOpen }) {
       onClick={onOpen}
       className="group overflow-hidden rounded-xl2 border border-forest-700/8 bg-white text-left shadow-card transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500/40"
     >
-      {activity.image_url ? (
-        <img
-          src={activity.image_url}
-          alt={activity.title}
-          loading="lazy"
-          className="h-28 w-full object-cover"
-        />
-      ) : (
-        <div className="flex h-28 items-center justify-center bg-gradient-to-br from-forest-600 to-forest-800">
-          <Icon className="h-9 w-9 text-sand-50/90" />
-        </div>
-      )}
+      <span className="relative block">
+        {activity.image_url ? (
+          <img
+            src={activity.image_url}
+            alt={activity.title}
+            loading="lazy"
+            className="h-28 w-full object-cover"
+          />
+        ) : (
+          <span className="flex h-28 items-center justify-center bg-gradient-to-br from-forest-600 to-forest-800">
+            <Icon className="h-9 w-9 text-sand-50/90" />
+          </span>
+        )}
+        {activity.images?.length > 1 && (
+          <span className="tick-num absolute right-2 top-2 rounded-full bg-soil-900/55 px-2 py-0.5 text-[10px] font-medium text-sand-50">
+            {activity.images.length}
+          </span>
+        )}
+      </span>
       <div className="p-4">
         <p className="text-sm font-semibold leading-snug text-forest-800">{activity.title}</p>
         <p className="mt-1 text-xs text-soil-500">{formatThaiDate(activity.activity_date)}</p>
